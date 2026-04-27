@@ -7,7 +7,8 @@ import java.util.List;
 
 public class QuantidadeTijolosRequestDTO {
 
-    @NotEmpty(message = "A lista de arestas não pode ser vazia")
+    private Long plantaBaixaId;
+
     @Valid
     private List<ArestaDTO> arestas;
 
@@ -21,6 +22,9 @@ public class QuantidadeTijolosRequestDTO {
     private double comprimentoTijolo;
 
     public QuantidadeTijolosRequestDTO() {}
+
+    public Long getPlantaBaixaId() { return plantaBaixaId; }
+    public void setPlantaBaixaId(Long plantaBaixaId) { this.plantaBaixaId = plantaBaixaId; }
 
     public List<ArestaDTO> getArestas() { return arestas; }
     public void setArestas(List<ArestaDTO> arestas) { this.arestas = arestas; }

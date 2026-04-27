@@ -3,42 +3,42 @@ package marco.calculadora_obra.application.service;
 import marco.calculadora_obra.api.dto.*;
 import marco.calculadora_obra.domain.service.CalculoConcreteService;
 import marco.calculadora_obra.infrastructure.persistence.entity.ArestaEntity;
+import marco.calculadora_obra.infrastructure.persistence.entity.PlantaBaixaEntity;
 import marco.calculadora_obra.infrastructure.persistence.repository.ArestaRepository;
+import marco.calculadora_obra.infrastructure.persistence.repository.PlantaBaixaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Implementação do cálculo de volume de concreto para vigas baldrame.
- *
- * Fórmula: Volume = Largura (espessura da parede) × Altura (viga) × Comprimento (aresta)
- *
- * Princípio S: responsável apenas pelo cálculo de concreto.
- * Princípio O: novas estratégias de cálculo implementam a interface sem alterar esta classe.
- * Princípio L: pode substituir CalculoConcreteService sem quebrar o comportamento esperado.
- */
 @Service
 public class CalculoConcreteServiceImpl implements CalculoConcreteService {
 
     private final ArestaRepository arestaRepository;
+    private final PlantaBaixaRepository plantaBaixaRepository;
+    private final PlantaBaixaServiceImpl plantaBaixaServiceImpl;
 
-    // Princípio D: injeção de dependência via construtor
-    public CalculoConcreteServiceImpl(ArestaRepository arestaRepository) {
+    public CalculoConcreteServiceImpl(ArestaRepository arestaRepository,
+                                       PlantaBaixaRepository plantaBaixaRepository,
+                                       PlantaBaixaServiceImpl plantaBaixaServiceImpl) {
         this.arestaRepository = arestaRepository;
+        this.plantaBaixaRepository = plantaBaixaRepository;
+        this.plantaBaixaServiceImpl = plantaBaixaServiceImpl;
     }
 
     @Override
     public VolumeConcreteResponseDTO calcularVolumeConcreto(VolumeConcreteRequestDTO request) {
+        List<ArestaDTO> arestas = resolverArestas(request.getPlantaBaixaId(), request.getArestas());
+
         List<DetalheVigaDTO> detalhes = new ArrayList<>();
         double volumeTotal = 0;
 
-        for (ArestaDTO dto : request.getArestas()) {
-            salvarAresta(dto);
+        for (ArestaDTO dto : arestas) {
+            if (request.getPlantaBaixaId() == null) {
+                salvarAresta(dto);
+            }
 
-            // Largura da viga  = espessura da parede
-            // Comprimento da viga = comprimento da parede
-            // Altura da viga = informada pelo usuário
             double volume = dto.getEspessura() * request.getAlturaViga() * dto.getComprimento();
             volumeTotal += volume;
 
@@ -53,14 +53,30 @@ public class CalculoConcreteServiceImpl implements CalculoConcreteService {
 
         return new VolumeConcreteResponseDTO(
             arredondar(volumeTotal),
-            request.getArestas().size(),
+            arestas.size(),
             detalhes
         );
+    }
+
+    private List<ArestaDTO> resolverArestas(Long plantaBaixaId, List<ArestaDTO> arestasDirectas) {
+        if (plantaBaixaId != null) {
+            PlantaBaixaEntity planta = plantaBaixaRepository.findById(plantaBaixaId)
+                    .orElseThrow(() -> new RuntimeException("Planta baixa não encontrada: " + plantaBaixaId));
+            return planta.getArestas().stream()
+                    .map(plantaBaixaServiceImpl::toArestaDTO)
+                    .collect(Collectors.toList());
+        }
+        if (arestasDirectas == null || arestasDirectas.isEmpty()) {
+            throw new IllegalArgumentException("Informe plantaBaixaId ou uma lista de arestas");
+        }
+        return arestasDirectas;
     }
 
     private void salvarAresta(ArestaDTO dto) {
         ArestaEntity entity = new ArestaEntity();
         entity.setArestaId(dto.getId());
+        entity.setOrigemId(dto.getOrigemId());
+        entity.setDestinoId(dto.getDestinoId());
         entity.setComprimento(dto.getComprimento());
         entity.setEspessura(dto.getEspessura());
         entity.setAlturaParede(dto.getAlturaParede());
@@ -75,7 +91,6 @@ public class CalculoConcreteServiceImpl implements CalculoConcreteService {
             entity.setAlturaPorta(dto.getPorta().getAltura());
             entity.setComprimentoPorta(dto.getPorta().getComprimento());
         }
-
         arestaRepository.save(entity);
     }
 

@@ -7,6 +7,8 @@ package marco.calculadora_obra.domain.model;
 public class Aresta {
 
     private String id;
+    private String origemId;
+    private String destinoId;
     private double comprimento;
     private double espessura;
     private double alturaParede;
@@ -18,8 +20,10 @@ public class Aresta {
 
     public Aresta() {}
 
-    public Aresta(String id, double comprimento, double espessura, double alturaParede) {
+    public Aresta(String id, String origemId, String destinoId, double comprimento, double espessura, double alturaParede) {
         this.id = id;
+        this.origemId = origemId;
+        this.destinoId = destinoId;
         this.comprimento = comprimento;
         this.espessura = espessura;
         this.alturaParede = alturaParede;
@@ -45,6 +49,12 @@ public class Aresta {
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getOrigemId() { return origemId; }
+    public void setOrigemId(String origemId) { this.origemId = origemId; }
+
+    public String getDestinoId() { return destinoId; }
+    public void setDestinoId(String destinoId) { this.destinoId = destinoId; }
 
     public double getComprimento() { return comprimento; }
     public void setComprimento(double comprimento) { this.comprimento = comprimento; }

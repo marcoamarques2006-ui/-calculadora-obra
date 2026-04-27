@@ -9,6 +9,9 @@ public class ArestaDTO {
     @NotBlank(message = "ID da aresta é obrigatório")
     private String id;
 
+    private String origemId;
+    private String destinoId;
+
     @Positive(message = "Comprimento deve ser positivo")
     private double comprimento;
 
@@ -31,6 +34,12 @@ public class ArestaDTO {
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getOrigemId() { return origemId; }
+    public void setOrigemId(String origemId) { this.origemId = origemId; }
+
+    public String getDestinoId() { return destinoId; }
+    public void setDestinoId(String destinoId) { this.destinoId = destinoId; }
 
     public double getComprimento() { return comprimento; }
     public void setComprimento(double comprimento) { this.comprimento = comprimento; }
