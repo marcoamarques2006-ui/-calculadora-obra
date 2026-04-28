@@ -2,15 +2,15 @@ package marco.calculadora_obra.api.dto;
 
 import java.util.List;
 
-public class VolumeConcreteResponseDTO {
+public class VolumeConcretoResponseDTO {
 
     private double volumeTotalM3;
     private int totalArestas;
     private List<DetalheVigaDTO> detalhes;
 
-    public VolumeConcreteResponseDTO() {}
+    public VolumeConcretoResponseDTO() {}
 
-    public VolumeConcreteResponseDTO(double volumeTotalM3,
+    public VolumeConcretoResponseDTO(double volumeTotalM3,
                                      int totalArestas,
                                      List<DetalheVigaDTO> detalhes) {
         this.volumeTotalM3 = volumeTotalM3;

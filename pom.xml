@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.6</version>
+		<version>3.4.5</version>
 		<relativePath/>
 	</parent>
-	<groupId>.marco</groupId>
+	<groupId>marco</groupId>
 	<artifactId>calculadora-obra</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>calculadora-obra</name>

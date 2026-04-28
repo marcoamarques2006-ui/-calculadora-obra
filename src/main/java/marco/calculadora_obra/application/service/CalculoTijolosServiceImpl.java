@@ -1,15 +1,14 @@
 package marco.calculadora_obra.application.service;
 
 import marco.calculadora_obra.api.dto.*;
+import marco.calculadora_obra.domain.model.Abertura;
+import marco.calculadora_obra.domain.model.Aresta;
 import marco.calculadora_obra.domain.service.CalculoTijolosService;
-import marco.calculadora_obra.infrastructure.persistence.entity.PlantaBaixaEntity;
-import marco.calculadora_obra.infrastructure.persistence.repository.ArestaRepository;
-import marco.calculadora_obra.infrastructure.persistence.repository.PlantaBaixaRepository;
+import marco.calculadora_obra.domain.service.PlantaBaixaService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CalculoTijolosServiceImpl implements CalculoTijolosService {
@@ -17,21 +16,15 @@ public class CalculoTijolosServiceImpl implements CalculoTijolosService {
     private static final double ESPESSURA_JUNTA = 0.01;
     private static final double FATOR_PERDA = 1.10;
 
-    private final ArestaRepository arestaRepository;
-    private final PlantaBaixaRepository plantaBaixaRepository;
-    private final PlantaBaixaServiceImpl plantaBaixaServiceImpl;
+    private final PlantaBaixaService plantaBaixaService;
 
-    public CalculoTijolosServiceImpl(ArestaRepository arestaRepository,
-                                      PlantaBaixaRepository plantaBaixaRepository,
-                                      PlantaBaixaServiceImpl plantaBaixaServiceImpl) {
-        this.arestaRepository = arestaRepository;
-        this.plantaBaixaRepository = plantaBaixaRepository;
-        this.plantaBaixaServiceImpl = plantaBaixaServiceImpl;
+    public CalculoTijolosServiceImpl(PlantaBaixaService plantaBaixaService) {
+        this.plantaBaixaService = plantaBaixaService;
     }
 
     @Override
     public QuantidadeTijolosResponseDTO calcularQuantidadeTijolos(QuantidadeTijolosRequestDTO request) {
-        List<ArestaDTO> arestas = resolverArestas(request.getPlantaBaixaId(), request.getArestas());
+        List<ArestaDTO> arestaDTOs = resolverArestas(request.getPlantaBaixaId(), request.getArestas());
 
         double areaFaceTijolo =
             (request.getAlturaTijolo() + ESPESSURA_JUNTA) *
@@ -42,17 +35,20 @@ public class CalculoTijolosServiceImpl implements CalculoTijolosService {
         int totalTijolos = 0;
         double areaTotalLiquida = 0;
 
-        for (ArestaDTO dto : arestas) {
-            double areaParede    = dto.getComprimento() * dto.getAlturaParede();
-            double areaAberturas = calcularAreaAberturas(dto);
-            double areaLiquida   = Math.max(0, areaParede - areaAberturas);
+        for (ArestaDTO dto : arestaDTOs) {
+            Aresta aresta = toAresta(dto);
+
+            // Usa os métodos do domínio para calcular áreas
+            double areaParede    = aresta.getAreaBruta();
+            double areaAberturas = aresta.getAreaAberturas();
+            double areaLiquida   = aresta.getAreaLiquida();
 
             int tijolosParede = (int) Math.ceil(areaLiquida * tijolosPorM2);
-            totalTijolos    += tijolosParede;
+            totalTijolos     += tijolosParede;
             areaTotalLiquida += areaLiquida;
 
             detalhes.add(new DetalheParedeDTO(
-                dto.getId(),
+                aresta.getId(),
                 arredondar(areaParede),
                 arredondar(areaAberturas),
                 arredondar(areaLiquida),
@@ -63,20 +59,13 @@ public class CalculoTijolosServiceImpl implements CalculoTijolosService {
         int totalComPerda = (int) Math.ceil(totalTijolos * FATOR_PERDA);
 
         return new QuantidadeTijolosResponseDTO(
-            totalTijolos,
-            totalComPerda,
-            arredondar(areaTotalLiquida),
-            detalhes
+            totalTijolos, totalComPerda, arredondar(areaTotalLiquida), detalhes
         );
     }
 
     private List<ArestaDTO> resolverArestas(Long plantaBaixaId, List<ArestaDTO> arestasDirectas) {
         if (plantaBaixaId != null) {
-            PlantaBaixaEntity planta = plantaBaixaRepository.findById(plantaBaixaId)
-                    .orElseThrow(() -> new RuntimeException("Planta baixa não encontrada: " + plantaBaixaId));
-            return planta.getArestas().stream()
-                    .map(plantaBaixaServiceImpl::toArestaDTO)
-                    .collect(Collectors.toList());
+            return plantaBaixaService.listarArestas(plantaBaixaId);
         }
         if (arestasDirectas == null || arestasDirectas.isEmpty()) {
             throw new IllegalArgumentException("Informe plantaBaixaId ou uma lista de arestas");
@@ -84,15 +73,20 @@ public class CalculoTijolosServiceImpl implements CalculoTijolosService {
         return arestasDirectas;
     }
 
-    private double calcularAreaAberturas(ArestaDTO dto) {
-        double area = 0;
+    private Aresta toAresta(ArestaDTO dto) {
+        Aresta aresta = new Aresta(
+            dto.getId(), dto.getOrigemId(), dto.getDestinoId(),
+            dto.getComprimento(), dto.getEspessura(), dto.getAlturaParede()
+        );
         if (dto.isTemJanela() && dto.getJanela() != null) {
-            area += dto.getJanela().getAltura() * dto.getJanela().getComprimento();
+            aresta.setTemJanela(true);
+            aresta.setJanela(new Abertura(dto.getJanela().getAltura(), dto.getJanela().getComprimento()));
         }
         if (dto.isTemPorta() && dto.getPorta() != null) {
-            area += dto.getPorta().getAltura() * dto.getPorta().getComprimento();
+            aresta.setTemPorta(true);
+            aresta.setPorta(new Abertura(dto.getPorta().getAltura(), dto.getPorta().getComprimento()));
         }
-        return area;
+        return aresta;
     }
 
     private double arredondar(double valor) {

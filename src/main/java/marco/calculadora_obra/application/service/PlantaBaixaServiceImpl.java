@@ -2,6 +2,7 @@ package marco.calculadora_obra.application.service;
 
 import marco.calculadora_obra.api.dto.*;
 import marco.calculadora_obra.domain.service.PlantaBaixaService;
+import java.util.List;
 import marco.calculadora_obra.infrastructure.persistence.entity.*;
 import marco.calculadora_obra.infrastructure.persistence.repository.*;
 import org.springframework.stereotype.Service;
@@ -81,6 +82,15 @@ public class PlantaBaixaServiceImpl implements PlantaBaixaService {
         return toResponse(planta);
     }
 
+    @Override
+    public List<ArestaDTO> listarArestas(Long plantaBaixaId) {
+        PlantaBaixaEntity planta = plantaBaixaRepository.findById(plantaBaixaId)
+                .orElseThrow(() -> new RuntimeException("Planta baixa não encontrada: " + plantaBaixaId));
+        return planta.getArestas().stream()
+                .map(this::toArestaDTO)
+                .collect(Collectors.toList());
+    }
+
     private PlantaBaixaResponseDTO toResponse(PlantaBaixaEntity e) {
         PlantaBaixaResponseDTO dto = new PlantaBaixaResponseDTO();
         dto.setId(e.getPk());
@@ -113,7 +123,7 @@ public class PlantaBaixaServiceImpl implements PlantaBaixaService {
         return dto;
     }
 
-    public ArestaDTO toArestaDTO(ArestaEntity e) {
+    private ArestaDTO toArestaDTO(ArestaEntity e) {
         ArestaDTO dto = new ArestaDTO();
         dto.setId(e.getArestaId());
         dto.setOrigemId(e.getOrigemId());
