@@ -1,10 +1,10 @@
 package marco.calculadora_obra.application.service;
 
 import marco.calculadora_obra.api.dto.*;
+import marco.calculadora_obra.domain.exception.RecursoNaoEncontradoException;
 import marco.calculadora_obra.domain.service.PlantaBaixaService;
-import java.util.List;
 import marco.calculadora_obra.infrastructure.persistence.entity.*;
-import marco.calculadora_obra.infrastructure.persistence.repository.*;
+import marco.calculadora_obra.infrastructure.persistence.repository.PlantaBaixaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,12 +16,9 @@ import java.util.stream.Collectors;
 public class PlantaBaixaServiceImpl implements PlantaBaixaService {
 
     private final PlantaBaixaRepository plantaBaixaRepository;
-    private final ArestaRepository arestaRepository;
 
-    public PlantaBaixaServiceImpl(PlantaBaixaRepository plantaBaixaRepository,
-                                   ArestaRepository arestaRepository) {
+    public PlantaBaixaServiceImpl(PlantaBaixaRepository plantaBaixaRepository) {
         this.plantaBaixaRepository = plantaBaixaRepository;
-        this.arestaRepository = arestaRepository;
     }
 
     @Override
@@ -30,7 +27,6 @@ public class PlantaBaixaServiceImpl implements PlantaBaixaService {
         PlantaBaixaEntity planta = new PlantaBaixaEntity();
         planta.setDescricao(request.getDescricao());
 
-        // Salva vértices
         for (VerticeDTO vDto : request.getVertices()) {
             VerticeEntity v = new VerticeEntity();
             v.setVerticeId(vDto.getId());
@@ -40,7 +36,6 @@ public class PlantaBaixaServiceImpl implements PlantaBaixaService {
             planta.getVertices().add(v);
         }
 
-        // Salva arestas (paredes), indexadas por arestaId para uso nos cômodos
         Map<String, ArestaEntity> arestasPorId = request.getArestas().stream()
                 .collect(Collectors.toMap(ArestaDTO::getId, dto -> {
                     ArestaEntity e = toEntity(dto);
@@ -49,7 +44,6 @@ public class PlantaBaixaServiceImpl implements PlantaBaixaService {
                 }));
         planta.getArestas().addAll(arestasPorId.values());
 
-        // Salva cômodos e associa suas paredes
         if (request.getComodos() != null) {
             for (ComodoDTO cDto : request.getComodos()) {
                 ComodoEntity comodo = new ComodoEntity();
@@ -71,24 +65,24 @@ public class PlantaBaixaServiceImpl implements PlantaBaixaService {
             }
         }
 
-        PlantaBaixaEntity salva = plantaBaixaRepository.save(planta);
-        return toResponse(salva);
+        return toResponse(plantaBaixaRepository.save(planta));
     }
 
     @Override
     public PlantaBaixaResponseDTO buscar(Long id) {
-        PlantaBaixaEntity planta = plantaBaixaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Planta baixa não encontrada: " + id));
-        return toResponse(planta);
+        return toResponse(buscarEntidade(id));
     }
 
     @Override
     public List<ArestaDTO> listarArestas(Long plantaBaixaId) {
-        PlantaBaixaEntity planta = plantaBaixaRepository.findById(plantaBaixaId)
-                .orElseThrow(() -> new RuntimeException("Planta baixa não encontrada: " + plantaBaixaId));
-        return planta.getArestas().stream()
+        return buscarEntidade(plantaBaixaId).getArestas().stream()
                 .map(this::toArestaDTO)
                 .collect(Collectors.toList());
+    }
+
+    private PlantaBaixaEntity buscarEntidade(Long id) {
+        return plantaBaixaRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Planta baixa não encontrada: " + id));
     }
 
     private PlantaBaixaResponseDTO toResponse(PlantaBaixaEntity e) {
