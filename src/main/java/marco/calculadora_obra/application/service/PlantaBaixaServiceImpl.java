@@ -56,9 +56,11 @@ public class PlantaBaixaServiceImpl implements PlantaBaixaService {
                 if (cDto.getArestaIds() != null) {
                     for (String arestaId : cDto.getArestaIds()) {
                         ArestaEntity aresta = arestasPorId.get(arestaId);
-                        if (aresta != null) {
-                            comodo.getParedes().add(aresta);
+                        if (aresta == null) {
+                            throw new IllegalArgumentException(
+                                "Cômodo '" + cDto.getNome() + "' referencia aresta inexistente: " + arestaId);
                         }
+                        comodo.getParedes().add(aresta);
                     }
                 }
                 planta.getComodos().add(comodo);
@@ -69,11 +71,13 @@ public class PlantaBaixaServiceImpl implements PlantaBaixaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PlantaBaixaResponseDTO buscar(Long id) {
         return toResponse(buscarEntidade(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ArestaDTO> listarArestas(Long plantaBaixaId) {
         return buscarEntidade(plantaBaixaId).getArestas().stream()
                 .map(this::toArestaDTO)

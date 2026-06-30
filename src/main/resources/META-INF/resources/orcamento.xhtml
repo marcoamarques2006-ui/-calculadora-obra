@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="conteudo">
+        <h:form id="form">
+            <h:messages styleClass="msg-info" errorClass="msg-error" warnClass="msg-warn" infoClass="msg-info"
+                        layout="table"/>
+
+            <div class="card">
+                <h2>1. Dados do solicitante</h2>
+                <div class="grid-2">
+                    <div>
+                        <label for="nome">Nome do usuário *</label>
+                        <h:inputText id="nome" value="#{orcamentoBean.nomeUsuario}"/>
+                    </div>
+                    <div>
+                        <label for="desc">Descrição da planta</label>
+                        <h:inputText id="desc" value="#{orcamentoBean.descricao}"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>2. Planta da casa — paredes</h2>
+                <p class="muted">Informe cada parede da planta. Marque se a parede possui janela e/ou porta
+                    para descontar a área das aberturas.</p>
+
+                <h:dataTable value="#{orcamentoBean.paredes}" var="p" rendered="#{not empty orcamentoBean.paredes}"
+                             styleClass="" style="border:none;">
+                    <h:column>
+                        <div class="parede-box">
+                            <div class="grid">
+                                <div>
+                                    <label>Identificação</label>
+                                    <h:inputText value="#{p.nome}"/>
+                                </div>
+                                <div>
+                                    <label>Comprimento (m)</label>
+                                    <h:inputText value="#{p.comprimento}"/>
+                                </div>
+                                <div>
+                                    <label>Espessura (m)</label>
+                                    <h:inputText value="#{p.espessura}"/>
+                                </div>
+                                <div>
+                                    <label>Altura da parede (m)</label>
+                                    <h:inputText value="#{p.alturaParede}"/>
+                                </div>
+                                <div>
+                                    <label>Possui janela?</label>
+                                    <h:selectBooleanCheckbox value="#{p.temJanela}"/>
+                                    <span class="muted"> janela: </span>
+                                    <h:inputText value="#{p.janelaAltura}" size="4" title="altura"/>
+                                    <span class="muted"> x </span>
+                                    <h:inputText value="#{p.janelaComprimento}" size="4" title="comprimento"/>
+                                </div>
+                                <div>
+                                    <label>Possui porta?</label>
+                                    <h:selectBooleanCheckbox value="#{p.temPorta}"/>
+                                    <span class="muted"> porta: </span>
+                                    <h:inputText value="#{p.portaAltura}" size="4" title="altura"/>
+                                    <span class="muted"> x </span>
+                                    <h:inputText value="#{p.portaComprimento}" size="4" title="comprimento"/>
+                                </div>
+                            </div>
+                            <p>
+                                <h:commandButton value="Remover parede" styleClass="btn btn-sec"
+                                                 action="#{orcamentoBean.removerParede(p)}"/>
+                            </p>
+                        </div>
+                    </h:column>
+                </h:dataTable>
+
+                <h:commandButton value="+ Adicionar parede" styleClass="btn btn-sec"
+                                 action="#{orcamentoBean.adicionarParede}"/>
+            </div>
+
+            <div class="card">
+                <h2>3. Parâmetros de cálculo</h2>
+                <div class="grid">
+                    <div>
+                        <label>Altura da viga baldrame (m)</label>
+                        <h:inputText value="#{orcamentoBean.alturaViga}"/>
+                    </div>
+                    <div>
+                        <label>Altura do tijolo (m)</label>
+                        <h:inputText value="#{orcamentoBean.alturaTijolo}"/>
+                    </div>
+                    <div>
+                        <label>Comprimento do tijolo (m)</label>
+                        <h:inputText value="#{orcamentoBean.comprimentoTijolo}"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>4. Preços e margem</h2>
+                <div class="grid">
+                    <div>
+                        <label>Preço do m³ de concreto (R$)</label>
+                        <h:inputText value="#{orcamentoBean.precoConcretoM3}"/>
+                    </div>
+                    <div>
+                        <label>Preço por tijolo (R$)</label>
+                        <h:inputText value="#{orcamentoBean.precoTijolo}"/>
+                    </div>
+                    <div>
+                        <label>Margem de lucro (%)</label>
+                        <h:inputText value="#{orcamentoBean.margemLucroPercentual}"/>
+                    </div>
+                </div>
+                <p style="margin-top:16px;">
+                    <h:commandButton value="Gerar orçamento" styleClass="btn" action="#{orcamentoBean.gerar}"/>
+                    <span> </span>
+                    <h:commandButton value="Limpar" styleClass="btn btn-sec" action="#{orcamentoBean.novo}"
+                                     immediate="true"/>
+                </p>
+            </div>
+
+            <h:panelGroup rendered="#{orcamentoBean.resultado != null}">
+                <div class="card">
+                    <h2>Orçamento Nº #{orcamentoBean.resultado.numero}</h2>
+                    <p>Cliente: <strong>#{orcamentoBean.resultado.nomeUsuario}</strong>
+                       <span class="muted"> — #{orcamentoBean.resultado.descricao}</span></p>
+
+                    <table>
+                        <tr><th>Volume de concreto</th>
+                            <td><h:outputText value="#{orcamentoBean.resultado.volumeConcretoM3}"/> m³</td></tr>
+                        <tr><th>Área líquida de parede</th>
+                            <td><h:outputText value="#{orcamentoBean.resultado.areaTotalLiquida}"/> m²</td></tr>
+                        <tr><th>Tijolos (sem perda)</th>
+                            <td>#{orcamentoBean.resultado.quantidadeTijolos}</td></tr>
+                        <tr><th>Tijolos (com 10% de perda)</th>
+                            <td>#{orcamentoBean.resultado.quantidadeTijolosComPerda}</td></tr>
+                        <tr><th>Custo do concreto</th>
+                            <td>R$ <h:outputText value="#{orcamentoBean.resultado.custoConcreto}"/></td></tr>
+                        <tr><th>Custo dos tijolos</th>
+                            <td>R$ <h:outputText value="#{orcamentoBean.resultado.custoTijolos}"/></td></tr>
+                        <tr><th>Custo total de materiais</th>
+                            <td>R$ <h:outputText value="#{orcamentoBean.resultado.custoTotalMateriais}"/></td></tr>
+                        <tr><th>Margem de lucro</th>
+                            <td><h:outputText value="#{orcamentoBean.resultado.margemLucroPercentual}"/> %</td></tr>
+                    </table>
+
+                    <p class="total" style="margin-top:14px;">
+                        Valor final: R$ <h:outputText value="#{orcamentoBean.resultado.valorFinalComMargem}"/>
+                    </p>
+
+                    <h3>Detalhamento por parede</h3>
+                    <h:dataTable value="#{orcamentoBean.resultado.itens}" var="it">
+                        <h:column><f:facet name="header">Parede</f:facet>#{it.paredeId}</h:column>
+                        <h:column><f:facet name="header">Área líq. (m²)</f:facet>
+                            <h:outputText value="#{it.areaLiquida}"/></h:column>
+                        <h:column><f:facet name="header">Volume (m³)</f:facet>
+                            <h:outputText value="#{it.volumeConcreto}"/></h:column>
+                        <h:column><f:facet name="header">Tijolos</f:facet>#{it.quantidadeTijolos}</h:column>
+                    </h:dataTable>
+                </div>
+            </h:panelGroup>
+        </h:form>
+    </ui:define>
+</ui:composition>

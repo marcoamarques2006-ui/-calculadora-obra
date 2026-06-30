@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="conteudo">
+        <h:form id="form">
+            <h:messages styleClass="msg-info" errorClass="msg-error" warnClass="msg-warn" infoClass="msg-info"/>
+
+            <div class="card">
+                <h2>Consultar orçamentos</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Buscar por número do orçamento</label>
+                        <h:inputText value="#{consultaBean.numero}"/>
+                        <p><h:commandButton value="Buscar por número" styleClass="btn"
+                                            action="#{consultaBean.buscarPorNumero}"/></p>
+                    </div>
+                    <div>
+                        <label>Buscar por nome do usuário</label>
+                        <h:inputText value="#{consultaBean.nomeUsuario}"/>
+                        <p><h:commandButton value="Buscar por nome" styleClass="btn"
+                                            action="#{consultaBean.buscarPorNome}"/></p>
+                    </div>
+                </div>
+                <p><h:commandButton value="Listar todos" styleClass="btn btn-sec"
+                                    action="#{consultaBean.listarTodos}"/></p>
+            </div>
+
+            <h:panelGroup layout="block" styleClass="card"
+                          rendered="#{consultaBean.pesquisou and not empty consultaBean.resultados}">
+                <h2>Resultados encontrados</h2>
+                <h:dataTable value="#{consultaBean.resultados}" var="o">
+                    <h:column><f:facet name="header">Nº</f:facet>#{o.numero}</h:column>
+                    <h:column><f:facet name="header">Cliente</f:facet>#{o.nomeUsuario}</h:column>
+                    <h:column><f:facet name="header">Descrição</f:facet>#{o.descricao}</h:column>
+                    <h:column><f:facet name="header">Concreto (m³)</f:facet>
+                        <h:outputText value="#{o.volumeConcretoM3}"/></h:column>
+                    <h:column><f:facet name="header">Tijolos c/ perda</f:facet>#{o.quantidadeTijolosComPerda}</h:column>
+                    <h:column><f:facet name="header">Valor final (R$)</f:facet>
+                        <h:outputText value="#{o.valorFinalComMargem}"/></h:column>
+                </h:dataTable>
+            </h:panelGroup>
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -1,7 +1,6 @@
 package marco.calculadora_obra.api.dto;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 
@@ -14,9 +13,6 @@ public class QuantidadeTijolosRequestDTO {
 
     @Positive(message = "Altura do tijolo deve ser positiva")
     private double alturaTijolo;
-
-    @Positive(message = "Largura do tijolo deve ser positiva")
-    private double larguraTijolo;
 
     @Positive(message = "Comprimento do tijolo deve ser positivo")
     private double comprimentoTijolo;
@@ -31,9 +27,6 @@ public class QuantidadeTijolosRequestDTO {
 
     public double getAlturaTijolo() { return alturaTijolo; }
     public void setAlturaTijolo(double alturaTijolo) { this.alturaTijolo = alturaTijolo; }
-
-    public double getLarguraTijolo() { return larguraTijolo; }
-    public void setLarguraTijolo(double larguraTijolo) { this.larguraTijolo = larguraTijolo; }
 
     public double getComprimentoTijolo() { return comprimentoTijolo; }
     public void setComprimentoTijolo(double comprimentoTijolo) { this.comprimentoTijolo = comprimentoTijolo; }

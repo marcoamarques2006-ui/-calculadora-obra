@@ -8,6 +8,7 @@ API REST para cálculo de materiais em obras residenciais. Modela a planta baixa
 
 - Java 17
 - Spring Boot 3.4.5
+- **Jakarta Faces (JSF / Mojarra) via JoinFaces 5.5.15 — frontend**
 - Spring Data JPA
 - Spring Validation
 - Banco de dados H2 (em memória)
@@ -81,10 +82,50 @@ A aplicação sobe em `http://localhost:8080`.
 
 ---
 
+## Frontend (Jakarta Faces / JSF)
+
+Interface web para o usuário solicitar e consultar orçamentos, implementada em **Jakarta Faces**
+(Mojarra) integrada ao Spring Boot via **JoinFaces**. As páginas `.xhtml` ficam em
+`src/main/resources/META-INF/resources` e os backing beans em `marco.calculadora_obra.web`.
+
+| Tela | URL | Função |
+|------|-----|--------|
+| Início | http://localhost:8080/ | Boas-vindas e navegação |
+| Novo orçamento | http://localhost:8080/orcamento.xhtml | Formulário dinâmico: dados do cliente, paredes (com janela/porta), parâmetros e preços → gera o orçamento |
+| Consulta | http://localhost:8080/consulta.xhtml | Busca orçamentos por **número** ou por **nome do usuário** |
+
+## Orçamentos (persistência e busca)
+
+O orçamento é calculado a partir da planta (paredes), combina o volume de concreto e a quantidade
+de tijolos, aplica preços e margem de lucro, e é **persistido** (tabelas `orcamentos` e
+`orcamento_itens`). Pode ser recuperado pelo **número** ou pelo **nome do usuário**.
+
+`POST /api/orcamentos` · `GET /api/orcamentos/{numero}` · `GET /api/orcamentos?nome={nome}`
+
+```json
+{
+  "nomeUsuario": "Marco Marques",
+  "descricao": "Casa térrea 3 quartos",
+  "alturaViga": 0.40, "alturaTijolo": 0.057, "comprimentoTijolo": 0.19,
+  "precoConcretoM3": 450.0, "precoTijolo": 1.20, "margemLucroPercentual": 20.0,
+  "paredes": [
+    { "id": "P1", "comprimento": 6.0, "espessura": 0.14, "alturaParede": 2.8,
+      "temPorta": true, "porta": { "altura": 2.1, "comprimento": 0.9 } }
+  ]
+}
+```
+
+**Fórmula do valor final:** `valor = (volumeConcreto×precoConcretoM3 + tijolosComPerda×precoTijolo) × (1 + margem/100)`
+
+## Plano de teste
+
+Veja [PLANO_DE_TESTE.md](PLANO_DE_TESTE.md) — 24 testes unitários (JUnit) + 6 casos de integração, todos com evidências.
+
 ## Documentação e ferramentas
 
 | Ferramenta   | URL                                      |
 |--------------|------------------------------------------|
+| Frontend JSF | http://localhost:8080/                   |
 | Swagger UI   | http://localhost:8080/swagger-ui/index.html |
 | OpenAPI JSON | http://localhost:8080/v3/api-docs        |
 | H2 Console   | http://localhost:8080/h2-console         |
@@ -194,7 +235,6 @@ Usando planta salva:
 {
   "plantaBaixaId": 1,
   "alturaTijolo": 0.057,
-  "larguraTijolo": 0.14,
   "comprimentoTijolo": 0.19
 }
 ```

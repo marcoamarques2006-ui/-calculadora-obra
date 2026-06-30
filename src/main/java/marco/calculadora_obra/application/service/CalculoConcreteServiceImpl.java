@@ -60,11 +60,19 @@ public class CalculoConcreteServiceImpl implements CalculoConcreteService {
             dto.getId(), dto.getOrigemId(), dto.getDestinoId(),
             dto.getComprimento(), dto.getEspessura(), dto.getAlturaParede()
         );
-        if (dto.isTemJanela() && dto.getJanela() != null) {
+        if (dto.isTemJanela()) {
+            if (dto.getJanela() == null) {
+                throw new IllegalArgumentException(
+                    "Aresta '" + dto.getId() + "' tem temJanela=true mas não informou as dimensões da janela");
+            }
             aresta.setTemJanela(true);
             aresta.setJanela(new Abertura(dto.getJanela().getAltura(), dto.getJanela().getComprimento()));
         }
-        if (dto.isTemPorta() && dto.getPorta() != null) {
+        if (dto.isTemPorta()) {
+            if (dto.getPorta() == null) {
+                throw new IllegalArgumentException(
+                    "Aresta '" + dto.getId() + "' tem temPorta=true mas não informou as dimensões da porta");
+            }
             aresta.setTemPorta(true);
             aresta.setPorta(new Abertura(dto.getPorta().getAltura(), dto.getPorta().getComprimento()));
         }

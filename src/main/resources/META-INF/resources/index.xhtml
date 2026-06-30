@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="conteudo">
+        <div class="card">
+            <h2>Bem-vindo</h2>
+            <p>Esta aplicação calcula o consumo de materiais (concreto da fundação e tijolos das paredes)
+               de uma obra residencial a partir da planta informada e gera um <strong>orçamento</strong>
+               com custos e margem de lucro.</p>
+            <p>
+                <h:button outcome="/orcamento" value="Solicitar novo orçamento" styleClass="btn"/>
+                <span> </span>
+                <h:button outcome="/consulta" value="Consultar orçamentos" styleClass="btn btn-sec"/>
+            </p>
+            <p class="muted">Ferramentas: Swagger UI em <code>/swagger-ui.html</code> ·
+               Console H2 em <code>/h2-console</code></p>
+        </div>
+    </ui:define>
+</ui:composition>
