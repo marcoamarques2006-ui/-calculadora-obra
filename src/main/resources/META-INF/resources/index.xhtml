@@ -5,18 +5,60 @@
                 xmlns:ui="jakarta.faces.facelets"
                 template="/WEB-INF/template.xhtml">
     <ui:define name="conteudo">
-        <div class="card">
-            <h2>Bem-vindo</h2>
-            <p>Esta aplicação calcula o consumo de materiais (concreto da fundação e tijolos das paredes)
-               de uma obra residencial a partir da planta informada e gera um <strong>orçamento</strong>
-               com custos e margem de lucro.</p>
-            <p>
-                <h:button outcome="/orcamento" value="Solicitar novo orçamento" styleClass="btn"/>
-                <span> </span>
-                <h:button outcome="/consulta" value="Consultar orçamentos" styleClass="btn btn-sec"/>
-            </p>
-            <p class="muted">Ferramentas: Swagger UI em <code>/swagger-ui.html</code> ·
-               Console H2 em <code>/h2-console</code></p>
-        </div>
+        <section class="hero">
+            <div>
+                <span class="eyebrow">Engenharia · Materiais · Custos</span>
+                <h1>Do desenho da planta ao orçamento, em segundos.</h1>
+                <p>Informe as paredes da residência e o ObraCalc dimensiona o concreto das vigas
+                   baldrame e a quantidade de tijolos, já com perdas, custos e margem de lucro.</p>
+                <div class="actions">
+                    <h:link outcome="/orcamento" value="Iniciar orçamento" styleClass="btn btn-primary"/>
+                    <h:link outcome="/consulta" value="Consultar existentes" styleClass="btn btn-ghost"/>
+                </div>
+            </div>
+            <div class="blueprint">
+                <h3>Resumo de um orçamento típico</h3>
+                <div class="row"><span>Volume de concreto</span><span class="num">1,12 m³</span></div>
+                <div class="row"><span>Tijolos (com perda)</span><span class="num">4.296 un</span></div>
+                <div class="row"><span>Área líquida de parede</span><span class="num">52,31 m²</span></div>
+                <div class="row"><span>Custo de materiais</span><span class="num">R$ 5.659,20</span></div>
+                <div class="row"><span>Valor final (+20%)</span><span class="num">R$ 6.791,04</span></div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature">
+                <div class="ic">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3>Planta por paredes</h3>
+                <p>Adicione quantas paredes quiser, com janelas e portas — a área das aberturas é
+                   descontada automaticamente.</p>
+            </div>
+            <div class="feature">
+                <div class="ic">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 3v18M3 8l9-5 9 5M5 10v8h14v-8" stroke="currentColor" stroke-width="1.8"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3>Cálculo de engenharia</h3>
+                <p>Volume de concreto das vigas baldrame e quantidade de tijolos por m², com fator
+                   de perda de 10%.</p>
+            </div>
+            <div class="feature">
+                <div class="ic">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3>Orçamento com margem</h3>
+                <p>Some preços de concreto e tijolo, aplique a margem de lucro e salve o orçamento
+                   para consultar depois.</p>
+            </div>
+        </section>
     </ui:define>
 </ui:composition>

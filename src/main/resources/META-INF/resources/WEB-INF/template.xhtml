@@ -6,50 +6,207 @@
 <h:head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Calculadora de Materiais para Obra</title>
+    <title>ObraCalc — Orçamento de Materiais</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0;
-               background: #f3f4f6; color: #1f2937; }
-        header { background: #b91c1c; color: #fff; padding: 16px 24px; }
-        header h1 { margin: 0; font-size: 1.3rem; }
-        nav a { color: #fff; margin-right: 18px; text-decoration: none; font-weight: 600; }
-        nav a:hover { text-decoration: underline; }
-        main { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
-        .card { background: #fff; border-radius: 10px; padding: 20px 24px; margin-bottom: 20px;
-                box-shadow: 0 1px 3px rgba(0,0,0,.1); }
-        h2 { margin-top: 0; color: #b91c1c; }
-        label { display: block; font-weight: 600; margin: 8px 0 4px; font-size: .9rem; }
-        input[type=text], input[type=number] { width: 100%; padding: 8px; border: 1px solid #d1d5db;
-                border-radius: 6px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-        th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; font-size: .9rem; }
-        th { background: #f9fafb; }
-        .btn { background: #b91c1c; color: #fff; border: none; padding: 10px 18px; border-radius: 6px;
-               cursor: pointer; font-weight: 600; }
-        .btn:hover { background: #991b1b; }
-        .btn-sec { background: #6b7280; }
-        .btn-sec:hover { background: #4b5563; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .msg-error { color: #b91c1c; font-weight: 600; }
-        .msg-info { color: #047857; font-weight: 600; }
-        .msg-warn { color: #b45309; font-weight: 600; }
-        .total { font-size: 1.4rem; color: #047857; font-weight: 700; }
-        .muted { color: #6b7280; font-size: .85rem; }
-        .parede-box { border: 1px dashed #d1d5db; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+        :root{
+            --ink:#0f172a; --ink-soft:#334155; --muted:#64748b; --faint:#94a3b8;
+            --line:#e2e8f0; --line-soft:#eef2f6; --bg:#f6f8fb; --surface:#ffffff;
+            --brand:#2563eb; --brand-dark:#1d4ed8; --brand-soft:#eff4ff;
+            --ok:#0f766e; --ok-soft:#ecfdf5; --gold:#b45309; --danger:#b91c1c;
+            --radius:16px; --radius-sm:10px;
+            --shadow-sm:0 1px 2px rgba(15,23,42,.05);
+            --shadow:0 4px 14px -6px rgba(15,23,42,.12),0 1px 3px rgba(15,23,42,.06);
+            --shadow-lg:0 24px 48px -20px rgba(15,23,42,.30);
+        }
+        *{box-sizing:border-box;}
+        html,body{margin:0;padding:0;}
+        body{
+            font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+            color:var(--ink); background:var(--bg);
+            -webkit-font-smoothing:antialiased; line-height:1.55;
+            background-image:radial-gradient(circle at 1px 1px,#e6ebf2 1px,transparent 0);
+            background-size:22px 22px;
+        }
+        a{color:inherit;}
+        h1,h2,h3{letter-spacing:-.02em;}
+        .num{font-family:'JetBrains Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums;}
+
+        /* ---- top bar ---- */
+        .topbar{
+            position:sticky; top:0; z-index:50; background:rgba(255,255,255,.82);
+            backdrop-filter:saturate(180%) blur(12px);
+            border-bottom:1px solid var(--line);
+        }
+        .topbar-in{max-width:1080px; margin:0 auto; padding:0 24px; height:64px;
+            display:flex; align-items:center; justify-content:space-between;}
+        .brand{display:flex; align-items:center; gap:11px; text-decoration:none; font-weight:800;
+            font-size:1.05rem; color:var(--ink);}
+        .brand .logo{width:34px; height:34px; border-radius:9px;
+            background:linear-gradient(135deg,#2563eb,#1e3a8a);
+            display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm);}
+        .brand small{display:block; font-weight:500; font-size:.7rem; color:var(--faint);
+            letter-spacing:.04em; text-transform:uppercase;}
+        nav.menu{display:flex; gap:6px;}
+        nav.menu a{display:inline-flex; align-items:center; gap:7px; text-decoration:none;
+            color:var(--ink-soft); font-weight:600; font-size:.9rem; padding:8px 14px;
+            border-radius:9px; transition:.15s;}
+        nav.menu a:hover{background:var(--line-soft); color:var(--ink);}
+        nav.menu a.active{background:var(--brand-soft); color:var(--brand-dark);}
+
+        /* ---- layout ---- */
+        main{max-width:1080px; margin:0 auto; padding:38px 24px 64px;}
+        .page-head{margin-bottom:26px;}
+        .eyebrow{display:inline-flex; align-items:center; gap:7px; font-size:.74rem; font-weight:700;
+            letter-spacing:.08em; text-transform:uppercase; color:var(--brand);
+            background:var(--brand-soft); padding:5px 11px; border-radius:999px; margin-bottom:14px;}
+        .page-head h1{margin:0 0 6px; font-size:1.9rem; font-weight:800;}
+        .page-head p{margin:0; color:var(--muted); max-width:62ch;}
+
+        /* ---- cards ---- */
+        .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+            padding:24px 26px; margin-bottom:20px; box-shadow:var(--shadow-sm);}
+        .card-head{display:flex; align-items:center; gap:13px; margin:0 0 18px;}
+        .step{flex:none; width:30px; height:30px; border-radius:9px; background:var(--ink);
+            color:#fff; font-weight:700; font-size:.9rem; display:flex; align-items:center; justify-content:center;}
+        .card-head h2{margin:0; font-size:1.12rem; font-weight:700;}
+        .card-head .sub{margin:1px 0 0; font-size:.83rem; color:var(--muted); font-weight:400;}
+
+        /* ---- forms ---- */
+        .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+        .grid-2{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
+        .field{display:flex; flex-direction:column; gap:6px;}
+        .field>label, label.lbl{font-weight:600; font-size:.82rem; color:var(--ink-soft);}
+        .hint{font-size:.76rem; color:var(--faint);}
+        input[type=text],input[type=number],select{
+            width:100%; padding:10px 12px; font-size:.92rem; font-family:inherit; color:var(--ink);
+            background:#fff; border:1px solid var(--line); border-radius:var(--radius-sm);
+            transition:.15s; outline:none;}
+        input[type=text]:focus,input[type=number]:focus{
+            border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft);}
+        input::placeholder{color:#cbd5e1;}
+
+        /* ---- parede rows ---- */
+        table.bare,table.bare>tbody>tr>td{border:none!important; padding:0!important; background:none;}
+        table.bare{width:100%;}
+        .parede{position:relative; border:1px solid var(--line); border-radius:var(--radius-sm);
+            padding:18px; margin-bottom:14px; background:#fcfdff;}
+        .parede .tag{position:absolute; top:-9px; left:16px; background:var(--ink); color:#fff;
+            font-size:.7rem; font-weight:700; letter-spacing:.04em; padding:3px 10px; border-radius:999px;}
+        .opening{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:.85rem; color:var(--ink-soft);}
+        .opening input[type=text]{width:64px; text-align:center; padding:7px 6px;}
+        .chk{display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:.82rem; color:var(--ink-soft);}
+        input[type=checkbox]{width:17px; height:17px; accent-color:var(--brand); cursor:pointer;}
+
+        /* ---- buttons ---- */
+        .btn{display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-family:inherit;
+            font-weight:600; font-size:.9rem; padding:11px 20px; border-radius:var(--radius-sm);
+            border:1px solid transparent; transition:.15s; text-decoration:none;}
+        .btn-primary{background:var(--brand); color:#fff; box-shadow:var(--shadow-sm);}
+        .btn-primary:hover{background:var(--brand-dark);}
+        .btn-ghost{background:#fff; color:var(--ink-soft); border-color:var(--line);}
+        .btn-ghost:hover{background:var(--line-soft); color:var(--ink);}
+        .btn-dashed{background:#fff; color:var(--brand-dark); border:1px dashed #bfd0f5;}
+        .btn-dashed:hover{background:var(--brand-soft);}
+        .btn-sm{padding:7px 13px; font-size:.8rem;}
+        .actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+
+        /* ---- tables ---- */
+        table.table{width:100%; border-collapse:separate; border-spacing:0; font-size:.9rem;
+            border:1px solid var(--line); border-radius:var(--radius-sm); overflow:hidden;}
+        table.table th{background:#f8fafc; text-align:left; font-weight:600; color:var(--muted);
+            font-size:.78rem; text-transform:uppercase; letter-spacing:.03em; padding:11px 14px;
+            border-bottom:1px solid var(--line);}
+        table.table td{padding:11px 14px; border-bottom:1px solid var(--line-soft);}
+        table.table tr:last-child td{border-bottom:none;}
+        table.table.kv th{width:48%; color:var(--ink-soft); text-transform:none; font-size:.85rem; background:#fff;
+            font-weight:500;}
+        table.table tbody tr:hover td{background:#fbfcfe;}
+
+        /* ---- result ---- */
+        .result-banner{display:flex; align-items:center; gap:12px; background:var(--ok-soft);
+            border:1px solid #c6f0e4; color:#0b5a52; padding:13px 18px; border-radius:var(--radius-sm);
+            font-weight:600; font-size:.92rem; margin-bottom:18px;}
+        .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:4px 0 22px;}
+        .stat{border:1px solid var(--line); border-radius:var(--radius-sm); padding:16px 18px; background:#fff;}
+        .stat .k{font-size:.74rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.04em;}
+        .stat .v{font-size:1.45rem; font-weight:800; margin-top:4px;}
+        .stat .u{font-size:.8rem; color:var(--faint); font-weight:500;}
+        .hero-value{background:linear-gradient(135deg,#0f172a,#1e293b); color:#fff; border-radius:var(--radius);
+            padding:26px 28px; display:flex; justify-content:space-between; align-items:flex-end; gap:20px;
+            box-shadow:var(--shadow); margin-bottom:22px;}
+        .hero-value .lbl2{font-size:.78rem; letter-spacing:.06em; text-transform:uppercase; color:#94a3b8; font-weight:600;}
+        .hero-value .big{font-size:2.5rem; font-weight:800; line-height:1; margin-top:8px;}
+        .hero-value .meta{text-align:right; font-size:.82rem; color:#cbd5e1;}
+
+        /* ---- messages ---- */
+        .jsf-msgs{list-style:none; padding:0; margin:0 0 18px;}
+        .jsf-msgs li, .jsf-msgs td{display:block; padding:12px 16px; border-radius:var(--radius-sm);
+            font-weight:600; font-size:.88rem; margin-bottom:8px; border:1px solid;}
+        .msg-error{background:#fef2f2; color:#b91c1c; border-color:#fecaca!important;}
+        .msg-warn{background:#fffbeb; color:#b45309; border-color:#fde68a!important;}
+        .msg-info{background:var(--ok-soft); color:#0b5a52; border-color:#c6f0e4!important;}
+
+        /* ---- landing ---- */
+        .hero{display:grid; grid-template-columns:1.1fr .9fr; gap:34px; align-items:center; margin-bottom:34px;}
+        .hero h1{font-size:2.5rem; font-weight:800; margin:14px 0 14px; line-height:1.08;}
+        .hero p{color:var(--muted); font-size:1.02rem; margin:0 0 24px; max-width:46ch;}
+        .blueprint{background:linear-gradient(135deg,#0f172a,#1e3a8a); border-radius:var(--radius);
+            padding:26px; color:#dbeafe; box-shadow:var(--shadow-lg); position:relative; overflow:hidden;}
+        .blueprint:before{content:""; position:absolute; inset:0;
+            background-image:linear-gradient(#ffffff14 1px,transparent 0),linear-gradient(90deg,#ffffff14 1px,transparent 0);
+            background-size:26px 26px;}
+        .blueprint .row{position:relative; display:flex; justify-content:space-between; padding:9px 0;
+            border-bottom:1px dashed #ffffff2e; font-size:.86rem;}
+        .blueprint .row:last-child{border-bottom:none;}
+        .blueprint .row span:last-child{font-weight:700; color:#fff;}
+        .blueprint h3{position:relative; margin:0 0 12px; color:#fff; font-size:1rem;}
+        .features{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+        .feature{background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:22px;
+            box-shadow:var(--shadow-sm);}
+        .feature .ic{width:40px; height:40px; border-radius:10px; background:var(--brand-soft); color:var(--brand-dark);
+            display:flex; align-items:center; justify-content:center; margin-bottom:13px;}
+        .feature h3{margin:0 0 6px; font-size:1rem;}
+        .feature p{margin:0; font-size:.87rem; color:var(--muted);}
+
+        footer{max-width:1080px; margin:0 auto; padding:24px; color:var(--faint); font-size:.82rem;
+            border-top:1px solid var(--line); text-align:center;}
+
+        @media(max-width:820px){
+            .grid,.grid-2,.stats,.features,.hero{grid-template-columns:1fr;}
+            .stats{grid-template-columns:repeat(2,1fr);}
+        }
     </style>
 </h:head>
 <h:body>
-    <header>
-        <h1>🏠 Calculadora de Materiais para Obra Residencial</h1>
-        <nav>
-            <h:link outcome="/orcamento" value="Novo Orçamento"/>
-            <h:link outcome="/consulta" value="Consultar Orçamentos"/>
-        </nav>
+    <header class="topbar">
+        <div class="topbar-in">
+            <a class="brand" href="#{request.contextPath}/index.xhtml">
+                <span class="logo">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="#fff" stroke-width="1.8"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <span>ObraCalc<small>Orçamento de obra</small></span>
+            </a>
+            <nav class="menu">
+                <h:link outcome="/orcamento" styleClass="#{view.viewId == '/orcamento.xhtml' ? 'active' : ''}">
+                    Novo orçamento
+                </h:link>
+                <h:link outcome="/consulta" styleClass="#{view.viewId == '/consulta.xhtml' ? 'active' : ''}">
+                    Consultar
+                </h:link>
+            </nav>
+        </div>
     </header>
     <main>
         <ui:insert name="conteudo"/>
     </main>
+    <footer>
+        ObraCalc · Calculadora de Materiais para Obra Residencial · Concreto de fundação + alvenaria
+    </footer>
 </h:body>
 </html>

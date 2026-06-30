@@ -4,160 +4,212 @@
                 xmlns:h="jakarta.faces.html"
                 xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets"
+                xmlns:pt="jakarta.faces.passthrough"
                 template="/WEB-INF/template.xhtml">
     <ui:define name="conteudo">
+        <div class="page-head">
+            <span class="eyebrow">Novo orçamento</span>
+            <h1>Solicitação de orçamento</h1>
+            <p>Preencha os dados da planta e os parâmetros de cálculo. Ao final, geramos o consumo
+               de materiais e o valor da obra.</p>
+        </div>
+
         <h:form id="form">
-            <h:messages styleClass="msg-info" errorClass="msg-error" warnClass="msg-warn" infoClass="msg-info"
-                        layout="table"/>
+            <h:messages styleClass="jsf-msgs" errorClass="msg-error" warnClass="msg-warn" infoClass="msg-info"
+                        layout="list"/>
 
             <div class="card">
-                <h2>1. Dados do solicitante</h2>
+                <div class="card-head">
+                    <span class="step">1</span>
+                    <div><h2>Dados do solicitante</h2>
+                        <p class="sub">Identificação do cliente e da planta.</p></div>
+                </div>
                 <div class="grid-2">
-                    <div>
-                        <label for="nome">Nome do usuário *</label>
-                        <h:inputText id="nome" value="#{orcamentoBean.nomeUsuario}"/>
+                    <div class="field">
+                        <label for="nome">Nome do usuário <span style="color:var(--brand)">*</span></label>
+                        <h:inputText id="nome" value="#{orcamentoBean.nomeUsuario}" pt:placeholder="Ex.: Marco Marques"/>
                     </div>
-                    <div>
+                    <div class="field">
                         <label for="desc">Descrição da planta</label>
-                        <h:inputText id="desc" value="#{orcamentoBean.descricao}"/>
+                        <h:inputText id="desc" value="#{orcamentoBean.descricao}" pt:placeholder="Ex.: Casa térrea 3 quartos"/>
                     </div>
                 </div>
             </div>
 
             <div class="card">
-                <h2>2. Planta da casa — paredes</h2>
-                <p class="muted">Informe cada parede da planta. Marque se a parede possui janela e/ou porta
-                    para descontar a área das aberturas.</p>
+                <div class="card-head">
+                    <span class="step">2</span>
+                    <div><h2>Planta da casa — paredes</h2>
+                        <p class="sub">Cada parede com suas dimensões. Marque janela/porta para descontar aberturas.</p></div>
+                </div>
 
-                <h:dataTable value="#{orcamentoBean.paredes}" var="p" rendered="#{not empty orcamentoBean.paredes}"
-                             styleClass="" style="border:none;">
+                <h:dataTable value="#{orcamentoBean.paredes}" var="p" styleClass="bare"
+                             rendered="#{not empty orcamentoBean.paredes}">
                     <h:column>
-                        <div class="parede-box">
+                        <div class="parede">
+                            <span class="tag">#{p.nome}</span>
                             <div class="grid">
-                                <div>
-                                    <label>Identificação</label>
+                                <div class="field">
+                                    <label class="lbl">Identificação</label>
                                     <h:inputText value="#{p.nome}"/>
                                 </div>
-                                <div>
-                                    <label>Comprimento (m)</label>
+                                <div class="field">
+                                    <label class="lbl">Comprimento (m)</label>
                                     <h:inputText value="#{p.comprimento}"/>
                                 </div>
-                                <div>
-                                    <label>Espessura (m)</label>
+                                <div class="field">
+                                    <label class="lbl">Espessura (m)</label>
                                     <h:inputText value="#{p.espessura}"/>
                                 </div>
-                                <div>
-                                    <label>Altura da parede (m)</label>
+                                <div class="field">
+                                    <label class="lbl">Altura da parede (m)</label>
                                     <h:inputText value="#{p.alturaParede}"/>
                                 </div>
-                                <div>
-                                    <label>Possui janela?</label>
-                                    <h:selectBooleanCheckbox value="#{p.temJanela}"/>
-                                    <span class="muted"> janela: </span>
-                                    <h:inputText value="#{p.janelaAltura}" size="4" title="altura"/>
-                                    <span class="muted"> x </span>
-                                    <h:inputText value="#{p.janelaComprimento}" size="4" title="comprimento"/>
+                                <div class="field">
+                                    <label class="lbl">Janela (altura × compr.)</label>
+                                    <div class="opening">
+                                        <span class="chk"><h:selectBooleanCheckbox value="#{p.temJanela}"/> tem</span>
+                                        <h:inputText value="#{p.janelaAltura}"/>
+                                        <span>×</span>
+                                        <h:inputText value="#{p.janelaComprimento}"/>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label>Possui porta?</label>
-                                    <h:selectBooleanCheckbox value="#{p.temPorta}"/>
-                                    <span class="muted"> porta: </span>
-                                    <h:inputText value="#{p.portaAltura}" size="4" title="altura"/>
-                                    <span class="muted"> x </span>
-                                    <h:inputText value="#{p.portaComprimento}" size="4" title="comprimento"/>
+                                <div class="field">
+                                    <label class="lbl">Porta (altura × compr.)</label>
+                                    <div class="opening">
+                                        <span class="chk"><h:selectBooleanCheckbox value="#{p.temPorta}"/> tem</span>
+                                        <h:inputText value="#{p.portaAltura}"/>
+                                        <span>×</span>
+                                        <h:inputText value="#{p.portaComprimento}"/>
+                                    </div>
                                 </div>
                             </div>
-                            <p>
-                                <h:commandButton value="Remover parede" styleClass="btn btn-sec"
+                            <div class="actions" style="margin-top:14px;">
+                                <h:commandButton value="Remover" styleClass="btn btn-ghost btn-sm"
                                                  action="#{orcamentoBean.removerParede(p)}"/>
-                            </p>
+                            </div>
                         </div>
                     </h:column>
                 </h:dataTable>
 
-                <h:commandButton value="+ Adicionar parede" styleClass="btn btn-sec"
+                <h:commandButton value="+ Adicionar parede" styleClass="btn btn-dashed"
                                  action="#{orcamentoBean.adicionarParede}"/>
             </div>
 
             <div class="card">
-                <h2>3. Parâmetros de cálculo</h2>
+                <div class="card-head">
+                    <span class="step">3</span>
+                    <div><h2>Parâmetros de cálculo</h2>
+                        <p class="sub">Viga baldrame e dimensões do tijolo.</p></div>
+                </div>
                 <div class="grid">
-                    <div>
-                        <label>Altura da viga baldrame (m)</label>
+                    <div class="field">
+                        <label class="lbl">Altura da viga baldrame (m)</label>
                         <h:inputText value="#{orcamentoBean.alturaViga}"/>
                     </div>
-                    <div>
-                        <label>Altura do tijolo (m)</label>
+                    <div class="field">
+                        <label class="lbl">Altura do tijolo (m)</label>
                         <h:inputText value="#{orcamentoBean.alturaTijolo}"/>
                     </div>
-                    <div>
-                        <label>Comprimento do tijolo (m)</label>
+                    <div class="field">
+                        <label class="lbl">Comprimento do tijolo (m)</label>
                         <h:inputText value="#{orcamentoBean.comprimentoTijolo}"/>
                     </div>
                 </div>
             </div>
 
             <div class="card">
-                <h2>4. Preços e margem</h2>
+                <div class="card-head">
+                    <span class="step">4</span>
+                    <div><h2>Preços e margem</h2>
+                        <p class="sub">Base para o valor final do orçamento.</p></div>
+                </div>
                 <div class="grid">
-                    <div>
-                        <label>Preço do m³ de concreto (R$)</label>
+                    <div class="field">
+                        <label class="lbl">Preço do m³ de concreto (R$)</label>
                         <h:inputText value="#{orcamentoBean.precoConcretoM3}"/>
                     </div>
-                    <div>
-                        <label>Preço por tijolo (R$)</label>
+                    <div class="field">
+                        <label class="lbl">Preço por tijolo (R$)</label>
                         <h:inputText value="#{orcamentoBean.precoTijolo}"/>
                     </div>
-                    <div>
-                        <label>Margem de lucro (%)</label>
+                    <div class="field">
+                        <label class="lbl">Margem de lucro (%)</label>
                         <h:inputText value="#{orcamentoBean.margemLucroPercentual}"/>
                     </div>
                 </div>
-                <p style="margin-top:16px;">
-                    <h:commandButton value="Gerar orçamento" styleClass="btn" action="#{orcamentoBean.gerar}"/>
-                    <span> </span>
-                    <h:commandButton value="Limpar" styleClass="btn btn-sec" action="#{orcamentoBean.novo}"
+                <div class="actions" style="margin-top:20px;">
+                    <h:commandButton value="Gerar orçamento" styleClass="btn btn-primary"
+                                     action="#{orcamentoBean.gerar}"/>
+                    <h:commandButton value="Limpar" styleClass="btn btn-ghost" action="#{orcamentoBean.novo}"
                                      immediate="true"/>
-                </p>
+                </div>
             </div>
 
             <h:panelGroup rendered="#{orcamentoBean.resultado != null}">
+                <div class="result-banner">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Orçamento Nº #{orcamentoBean.resultado.numero} gerado e salvo com sucesso.
+                </div>
+
+                <div class="hero-value">
+                    <div>
+                        <div class="lbl2">Valor final do orçamento</div>
+                        <div class="big num">R$ <h:outputText value="#{orcamentoBean.resultado.valorFinalComMargem}"/></div>
+                    </div>
+                    <div class="meta">
+                        Cliente: <strong style="color:#fff">#{orcamentoBean.resultado.nomeUsuario}</strong><br/>
+                        Materiais: R$ <span class="num"><h:outputText value="#{orcamentoBean.resultado.custoTotalMateriais}"/></span><br/>
+                        Margem: <span class="num"><h:outputText value="#{orcamentoBean.resultado.margemLucroPercentual}"/></span>%
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="k">Concreto</div>
+                        <div class="v num"><h:outputText value="#{orcamentoBean.resultado.volumeConcretoM3}"/> <span class="u">m³</span></div>
+                    </div>
+                    <div class="stat">
+                        <div class="k">Área líquida</div>
+                        <div class="v num"><h:outputText value="#{orcamentoBean.resultado.areaTotalLiquida}"/> <span class="u">m²</span></div>
+                    </div>
+                    <div class="stat">
+                        <div class="k">Tijolos c/ perda</div>
+                        <div class="v num">#{orcamentoBean.resultado.quantidadeTijolosComPerda}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="k">Tijolos (líq.)</div>
+                        <div class="v num">#{orcamentoBean.resultado.quantidadeTijolos}</div>
+                    </div>
+                </div>
+
                 <div class="card">
-                    <h2>Orçamento Nº #{orcamentoBean.resultado.numero}</h2>
-                    <p>Cliente: <strong>#{orcamentoBean.resultado.nomeUsuario}</strong>
-                       <span class="muted"> — #{orcamentoBean.resultado.descricao}</span></p>
-
-                    <table>
-                        <tr><th>Volume de concreto</th>
-                            <td><h:outputText value="#{orcamentoBean.resultado.volumeConcretoM3}"/> m³</td></tr>
-                        <tr><th>Área líquida de parede</th>
-                            <td><h:outputText value="#{orcamentoBean.resultado.areaTotalLiquida}"/> m²</td></tr>
-                        <tr><th>Tijolos (sem perda)</th>
-                            <td>#{orcamentoBean.resultado.quantidadeTijolos}</td></tr>
-                        <tr><th>Tijolos (com 10% de perda)</th>
-                            <td>#{orcamentoBean.resultado.quantidadeTijolosComPerda}</td></tr>
+                    <div class="card-head"><div><h2>Composição de custos</h2></div></div>
+                    <table class="table kv">
                         <tr><th>Custo do concreto</th>
-                            <td>R$ <h:outputText value="#{orcamentoBean.resultado.custoConcreto}"/></td></tr>
+                            <td class="num">R$ <h:outputText value="#{orcamentoBean.resultado.custoConcreto}"/></td></tr>
                         <tr><th>Custo dos tijolos</th>
-                            <td>R$ <h:outputText value="#{orcamentoBean.resultado.custoTijolos}"/></td></tr>
+                            <td class="num">R$ <h:outputText value="#{orcamentoBean.resultado.custoTijolos}"/></td></tr>
                         <tr><th>Custo total de materiais</th>
-                            <td>R$ <h:outputText value="#{orcamentoBean.resultado.custoTotalMateriais}"/></td></tr>
-                        <tr><th>Margem de lucro</th>
-                            <td><h:outputText value="#{orcamentoBean.resultado.margemLucroPercentual}"/> %</td></tr>
+                            <td class="num">R$ <h:outputText value="#{orcamentoBean.resultado.custoTotalMateriais}"/></td></tr>
+                        <tr><th>Valor final (com margem)</th>
+                            <td class="num"><strong>R$ <h:outputText value="#{orcamentoBean.resultado.valorFinalComMargem}"/></strong></td></tr>
                     </table>
+                </div>
 
-                    <p class="total" style="margin-top:14px;">
-                        Valor final: R$ <h:outputText value="#{orcamentoBean.resultado.valorFinalComMargem}"/>
-                    </p>
-
-                    <h3>Detalhamento por parede</h3>
-                    <h:dataTable value="#{orcamentoBean.resultado.itens}" var="it">
+                <div class="card">
+                    <div class="card-head"><div><h2>Detalhamento por parede</h2></div></div>
+                    <h:dataTable value="#{orcamentoBean.resultado.itens}" var="it" styleClass="table">
                         <h:column><f:facet name="header">Parede</f:facet>#{it.paredeId}</h:column>
                         <h:column><f:facet name="header">Área líq. (m²)</f:facet>
-                            <h:outputText value="#{it.areaLiquida}"/></h:column>
+                            <span class="num"><h:outputText value="#{it.areaLiquida}"/></span></h:column>
                         <h:column><f:facet name="header">Volume (m³)</f:facet>
-                            <h:outputText value="#{it.volumeConcreto}"/></h:column>
-                        <h:column><f:facet name="header">Tijolos</f:facet>#{it.quantidadeTijolos}</h:column>
+                            <span class="num"><h:outputText value="#{it.volumeConcreto}"/></span></h:column>
+                        <h:column><f:facet name="header">Tijolos</f:facet>
+                            <span class="num">#{it.quantidadeTijolos}</span></h:column>
                     </h:dataTable>
                 </div>
             </h:panelGroup>

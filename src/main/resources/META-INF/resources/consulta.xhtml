@@ -4,44 +4,65 @@
                 xmlns:h="jakarta.faces.html"
                 xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets"
+                xmlns:pt="jakarta.faces.passthrough"
                 template="/WEB-INF/template.xhtml">
     <ui:define name="conteudo">
+        <div class="page-head">
+            <span class="eyebrow">Consulta</span>
+            <h1>Orçamentos salvos</h1>
+            <p>Localize um orçamento pelo número ou pelo nome do cliente.</p>
+        </div>
+
         <h:form id="form">
-            <h:messages styleClass="msg-info" errorClass="msg-error" warnClass="msg-warn" infoClass="msg-info"/>
+            <h:messages styleClass="jsf-msgs" errorClass="msg-error" warnClass="msg-warn" infoClass="msg-info"
+                        layout="list"/>
 
             <div class="card">
-                <h2>Consultar orçamentos</h2>
                 <div class="grid-2">
-                    <div>
-                        <label>Buscar por número do orçamento</label>
-                        <h:inputText value="#{consultaBean.numero}"/>
-                        <p><h:commandButton value="Buscar por número" styleClass="btn"
-                                            action="#{consultaBean.buscarPorNumero}"/></p>
+                    <div class="field">
+                        <label class="lbl">Número do orçamento</label>
+                        <div class="actions">
+                            <h:inputText value="#{consultaBean.numero}" pt:placeholder="Ex.: 1" style="max-width:160px"/>
+                            <h:commandButton value="Buscar" styleClass="btn btn-primary"
+                                             action="#{consultaBean.buscarPorNumero}"/>
+                        </div>
                     </div>
-                    <div>
-                        <label>Buscar por nome do usuário</label>
-                        <h:inputText value="#{consultaBean.nomeUsuario}"/>
-                        <p><h:commandButton value="Buscar por nome" styleClass="btn"
-                                            action="#{consultaBean.buscarPorNome}"/></p>
+                    <div class="field">
+                        <label class="lbl">Nome do usuário</label>
+                        <div class="actions">
+                            <h:inputText value="#{consultaBean.nomeUsuario}" pt:placeholder="Ex.: Marco"/>
+                            <h:commandButton value="Buscar" styleClass="btn btn-primary"
+                                             action="#{consultaBean.buscarPorNome}"/>
+                        </div>
                     </div>
                 </div>
-                <p><h:commandButton value="Listar todos" styleClass="btn btn-sec"
-                                    action="#{consultaBean.listarTodos}"/></p>
+                <div class="actions" style="margin-top:16px;">
+                    <h:commandButton value="Listar todos" styleClass="btn btn-ghost"
+                                     action="#{consultaBean.listarTodos}"/>
+                </div>
             </div>
 
             <h:panelGroup layout="block" styleClass="card"
                           rendered="#{consultaBean.pesquisou and not empty consultaBean.resultados}">
-                <h2>Resultados encontrados</h2>
-                <h:dataTable value="#{consultaBean.resultados}" var="o">
-                    <h:column><f:facet name="header">Nº</f:facet>#{o.numero}</h:column>
+                <div class="card-head"><div><h2>Resultados</h2>
+                    <p class="sub">Orçamentos encontrados para a busca.</p></div></div>
+                <h:dataTable value="#{consultaBean.resultados}" var="o" styleClass="table">
+                    <h:column><f:facet name="header">Nº</f:facet>
+                        <span class="num">#{o.numero}</span></h:column>
                     <h:column><f:facet name="header">Cliente</f:facet>#{o.nomeUsuario}</h:column>
                     <h:column><f:facet name="header">Descrição</f:facet>#{o.descricao}</h:column>
                     <h:column><f:facet name="header">Concreto (m³)</f:facet>
-                        <h:outputText value="#{o.volumeConcretoM3}"/></h:column>
-                    <h:column><f:facet name="header">Tijolos c/ perda</f:facet>#{o.quantidadeTijolosComPerda}</h:column>
+                        <span class="num"><h:outputText value="#{o.volumeConcretoM3}"/></span></h:column>
+                    <h:column><f:facet name="header">Tijolos c/ perda</f:facet>
+                        <span class="num">#{o.quantidadeTijolosComPerda}</span></h:column>
                     <h:column><f:facet name="header">Valor final (R$)</f:facet>
-                        <h:outputText value="#{o.valorFinalComMargem}"/></h:column>
+                        <strong class="num"><h:outputText value="#{o.valorFinalComMargem}"/></strong></h:column>
                 </h:dataTable>
+            </h:panelGroup>
+
+            <h:panelGroup layout="block" styleClass="card"
+                          rendered="#{consultaBean.pesquisou and empty consultaBean.resultados}">
+                <p style="margin:0; color:var(--muted);">Nenhum orçamento encontrado para a busca informada.</p>
             </h:panelGroup>
         </h:form>
     </ui:define>
